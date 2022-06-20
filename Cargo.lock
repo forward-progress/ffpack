@@ -46,7 +46,7 @@ dependencies = [
 
 [[package]]
 name = "ffpack"
-version = "0.0.1-dev"
+version = "0.0.1-dev.0"
 dependencies = [
  "enum_dispatch",
  "once_cell",

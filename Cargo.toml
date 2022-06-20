@@ -1,7 +1,13 @@
 [package]
 name = "ffpack"
-version = "0.0.1-dev"
+description = "Minecraft modpack creation tool"
+license = "0BSD"
+repository = "https://github.com/forward-progress/ffpack"
+homepage = "http://forward-progress.net"
+authors = ["Nathan McCarty <nathan@mccarty.io>"]
+version = "0.0.1-dev.0"
 edition = "2021"
+readme = "README.md"
 
 [features]
 # Libraries only used by the binary
