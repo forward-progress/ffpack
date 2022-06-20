@@ -16,7 +16,7 @@ use tracing::{debug, instrument, trace};
 /// TODO: Document
 #[derive(PartialEq, Eq, Debug, Serialize, Deserialize, Clone, Hash)]
 #[serde(tag = "type")]
-pub enum MinecraftVersion {
+pub enum Minecraft {
     /// Release version of the game
     ///
     /// This does not include snapshots post 1.0
@@ -45,12 +45,12 @@ pub enum MinecraftVersion {
     },
 }
 
-impl MinecraftVersion {
+impl Minecraft {
     /// Create a new version from a string, verifying it in the process
     ///
     /// TODO: Document
     #[instrument(skip(from), fields(raw = from.as_ref()), err)]
-    pub fn new(from: impl AsRef<str>) -> Result<MinecraftVersion, MinecraftVersionError> {
+    pub fn new(from: impl AsRef<str>) -> Result<Minecraft, MinecraftVersionError> {
         // Build our regexes (lazily)
         /// Regex for matching a release version (`x.y.z` or `x.y`)
         static RELEASE_REGEX: Lazy<Regex> =
@@ -118,31 +118,31 @@ impl MinecraftVersion {
     fn order_priority(&self) -> usize {
         // This must always return values that are different for each version
         match self {
-            MinecraftVersion::Release { .. } => 1,
-            MinecraftVersion::Snapshot { .. } => 2,
+            Minecraft::Release { .. } => 1,
+            Minecraft::Snapshot { .. } => 2,
         }
     }
 }
 
-impl PartialOrd for MinecraftVersion {
+impl PartialOrd for Minecraft {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for MinecraftVersion {
+impl Ord for Minecraft {
     fn cmp(&self, other: &Self) -> Ordering {
         // Only attempt a comparison if the version is of the same order priority
         match self.order_priority().cmp(&other.order_priority()) {
             // We know that the two values must be of the same "type", so we have to do a deep
             // comparison
             Ordering::Equal => match self {
-                MinecraftVersion::Release {
+                Minecraft::Release {
                     major: major_self,
                     minor: minor_self,
                     patch: patch_self,
                 } => {
-                    if let MinecraftVersion::Release {
+                    if let Minecraft::Release {
                         major: major_other,
                         minor: minor_other,
                         patch: patch_other,
@@ -169,12 +169,12 @@ impl Ord for MinecraftVersion {
                         unreachable!()
                     }
                 }
-                MinecraftVersion::Snapshot {
+                Minecraft::Snapshot {
                     year: year_self,
                     week: week_self,
                     specifier: specifier_self,
                 } => {
-                    if let MinecraftVersion::Snapshot {
+                    if let Minecraft::Snapshot {
                         year: year_other,
                         week: week_other,
                         specifier: specifer_other,
@@ -208,10 +208,10 @@ impl Ord for MinecraftVersion {
     }
 }
 
-impl Display for MinecraftVersion {
+impl Display for Minecraft {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MinecraftVersion::Release {
+            Minecraft::Release {
                 major,
                 minor,
                 patch,
@@ -222,7 +222,7 @@ impl Display for MinecraftVersion {
                     write!(f, "{}.{}", major, minor)
                 }
             }
-            MinecraftVersion::Snapshot {
+            Minecraft::Snapshot {
                 year,
                 week,
                 specifier,
@@ -231,10 +231,10 @@ impl Display for MinecraftVersion {
     }
 }
 
-impl Default for MinecraftVersion {
+impl Default for Minecraft {
     fn default() -> Self {
         // Current minecraft version at time of writing
-        MinecraftVersion::Release {
+        Minecraft::Release {
             major: 1,
             minor: 19,
             patch: None,
@@ -271,7 +271,7 @@ mod unit_tests {
         let pairs = vec![
             (
                 "1.18.2",
-                MinecraftVersion::Release {
+                Minecraft::Release {
                     major: 1,
                     minor: 18,
                     patch: Some(2),
@@ -279,7 +279,7 @@ mod unit_tests {
             ),
             (
                 "1.19",
-                MinecraftVersion::Release {
+                Minecraft::Release {
                     major: 1,
                     minor: 19,
                     patch: None,
@@ -287,7 +287,7 @@ mod unit_tests {
             ),
             (
                 "18w10d",
-                MinecraftVersion::Snapshot {
+                Minecraft::Snapshot {
                     year: 18,
                     week: 10,
                     specifier: "d".to_string(),
@@ -295,7 +295,7 @@ mod unit_tests {
             ),
         ];
         for (raw, version) in pairs {
-            match MinecraftVersion::new(raw) {
+            match Minecraft::new(raw) {
                 Ok(parsed) => assert_eq!(version, parsed),
                 Err(e) => {
                     println!("Failed to parse version: {}", raw);
@@ -310,11 +310,11 @@ mod unit_tests {
     #[test]
     fn order() {
         // An ordered list of test version
-        let versions: Vec<MinecraftVersion> = vec![
+        let versions: Vec<Minecraft> = vec![
             "1.1", "1.6.2", "1.18", "1.18.1", "1.18.2", "1.19", "18w10d", "22w28a", "22w28b",
         ]
         .into_iter()
-        .map(|x| MinecraftVersion::new(x).unwrap())
+        .map(|x| Minecraft::new(x).unwrap())
         .collect();
         // Since the test list is ordered, we can use a comparison of the indexes to check against
         for (index_1, version_1) in versions.iter().enumerate() {
@@ -331,7 +331,7 @@ mod unit_tests {
             "1.1", "1.6.2", "1.18", "1.18.1", "1.18.2", "1.19", "18w10d", "22w28a", "22w28b",
         ];
         for version_raw in versions_raw {
-            let parsed = MinecraftVersion::new(version_raw).unwrap();
+            let parsed = Minecraft::new(version_raw).unwrap();
             let displayed = format!("{}", parsed);
             assert_eq!(version_raw, &displayed);
         }
