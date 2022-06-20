@@ -2,10 +2,12 @@
 //!
 //! TODO: Improve Documentation
 
+mod files;
 mod loader;
 mod minecraft;
 
 // Rexport types
+pub use files::{ManagedFile, Side, Source};
 pub use loader::Loader;
 pub use minecraft::Minecraft;
 

@@ -14,19 +14,33 @@
     clippy::implicit_hasher
 )]
 
+use std::collections::BTreeSet;
+
 use serde::{Deserialize, Serialize};
 
 pub mod types;
 
-use types::{Metadata, Versions};
+use types::{ManagedFile, Metadata, Versions};
 
 /// High level representation of a modpack
 ///
 /// TODO: Document
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Hash, Default)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Hash)]
 pub struct Pack {
     /// The metadata for this pack
     pub metadata: Metadata,
     /// The versions of minecraft and the launcher that this pack works with
     pub versions: Versions,
+    /// The list of managed files
+    pub managed_files: BTreeSet<ManagedFile>,
+}
+
+impl Default for Pack {
+    fn default() -> Self {
+        Self {
+            metadata: Metadata::default(),
+            versions: Versions::default(),
+            managed_files: [ManagedFile::default()].into_iter().collect(),
+        }
+    }
 }
