@@ -67,12 +67,16 @@
         packages.${crateName} = naersk-lib.buildPackage {
           pname = "${crateName}";
           root = ./.;
+          # Enable binary features so we actually get the binary
+          cargoBuildOptions = x: x ++ [ ''--features="binary"'' ];
         };
         # binary + tests
         packages.tests.${crateName} = naersk-lib.buildPackage {
           pname = "${crateName}";
           root = ./.;
           doCheck = true;
+          # Enable binary features so we actually get the binary
+          cargoBuildOptions = x: x ++ [ ''--features="binary"'' ];
         };
 
         packages.docs.${crateName} = naersk-lib.buildPackage {

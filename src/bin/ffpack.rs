@@ -1,3 +1,7 @@
+use ffpack::Pack;
+
 pub fn main() {
-    println!("Hello World!");
+    let pack = Pack::default();
+    let output = serde_json::to_string_pretty(&pack).unwrap();
+    println!("{}", output);
 }
